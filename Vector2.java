@@ -24,4 +24,7 @@ public class Vector2 {
         this.x = 0;
         this.y = 0;
     }
+    public double magnitude(){
+        return Math.sqrt(this.x*this.x + this.y*this.y);
+    }
 }
