@@ -47,25 +47,24 @@ public class PhysicsEngine {
     }
 
     private void particleCollision(Particle p){
+    
         List<Particle> particles = getParticles();
-    int particleCount = particles.size();
+        int particleCount = particles.size();
 
-    for (int i = 0; i < particleCount; i++) {
-        Particle p1 = particles.get(i);
+        for (int i = 0; i < particleCount; i++) {
+            Particle p1 = particles.get(i);
         
-        for (int j = i + 1; j < particleCount; j++) {
-            Particle p2 = particles.get(j);
+            for (int j = i + 1; j < particleCount; j++) {
+                Particle p2 = particles.get(j);
 
-            double dx = p1.position.x - p2.position.x;
-            double dy = p1.position.y - p2.position.y;
-            double distance = Math.sqrt(dx * dx + dy * dy);
+                double dx = p1.position.x - p2.position.x;
+                double dy = p1.position.y - p2.position.y;
+                double distance = Math.sqrt(dx * dx + dy * dy);
 
-            double minDistance = p1.radius + p2.radius;
+                double minDistance = p1.radius + p2.radius;
 
-            if (distance <= minDistance) {
-                System.out.println("Çarpışma");
-                p.velocity.y *= -p.RESTITUTION;
-                p2.velocity.y *= -p2.RESTITUTION;
+                if (distance <= minDistance) {
+                    System.out.println("Collision");
             }
         }
     }

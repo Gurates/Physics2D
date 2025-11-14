@@ -15,9 +15,9 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     private final int FLOOR_Y = 540;
     
     // UI
-    private final JTextField gravityField;
-    private final JTextField radiusField;
-    private final JTextField massField;
+    private JTextField gravityField;
+    private JTextField radiusField;
+    private JTextField massField;
     
     // Mouse etkileşimi
     private boolean isDragging = false;
@@ -27,62 +27,100 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     public SimulationApp() {
         this.engine = new PhysicsEngine();
 
+        this.setLayout(new BorderLayout()); 
+        
         addMouseListener(this);
         addMouseMotionListener(this);
         addKeyListener(this);
         setFocusable(true);
         requestFocusInWindow();
 
-        // UI
-        setLayout(new FlowLayout());
+        JPanel controlPanel = createControlPanel();
+        this.add(controlPanel, BorderLayout.EAST);
         
-        Particle initialParticle = engine.getParticles().get(0);
+        this.add(getSimulationArea(), BorderLayout.CENTER);
 
-        // Gravity
-        gravityField = new JTextField(5);
+
+        Particle initialParticle = engine.getParticles().get(0);
         gravityField.setText(String.valueOf(initialParticle.gravityForce));
-        add(new JLabel("Gravity:"));
-        add(gravityField);
+        radiusField.setText(String.valueOf(initialParticle.radius));
+        massField.setText(String.valueOf(initialParticle.mass));
+
+        Timer timer = new Timer(16, this);
+        timer.start();
+    }
+    
+    private JPanel createControlPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); 
+        panel.setPreferredSize(new Dimension(220, getHeight())); 
+
+        JLabel title = new JLabel("CONTROLS");
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
+        panel.add(title);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        
+        // gravity
+        JPanel gravityPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        gravityField = new JTextField(8);
+        gravityPanel.add(new JLabel("Gravity (N):"));
+        gravityPanel.add(gravityField);
+        panel.add(gravityPanel);
         
         // Radius
-        radiusField = new JTextField(5);
-        radiusField.setText(String.valueOf(initialParticle.radius));
-        add(new JLabel("Radius:"));
-        add(radiusField);
+        JPanel radiusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        radiusField = new JTextField(8);
+        radiusPanel.add(new JLabel("Radius (px):"));
+        radiusPanel.add(radiusField);
+        panel.add(radiusPanel);
         
         // Mass
-        massField = new JTextField(5);
-        massField.setText(String.valueOf(initialParticle.mass));
-        add(new JLabel("Mass:"));
-        add(massField);
+        JPanel massPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        massField = new JTextField(8);
+        massPanel.add(new JLabel("Mass (kg):"));
+        massPanel.add(massField);
+        panel.add(massPanel);
 
-        // Apply Button
-        JButton applyButton = new JButton("Apply");
+        panel.add(Box.createRigidArea(new Dimension(0, 10))); 
         
-        // Spawn Object Button
-        JButton spawnObjecButton = new JButton("Spawn Object");
-        add(spawnObjecButton);
-        spawnObjecButton.addActionListener(e -> {
-            engine.spawnNewParticle(getWidth());
-        });
-
-        add(applyButton);
-
+        // Apply Button
+        JButton applyButton = new JButton("Apply All Parameters");
+        applyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         applyButton.addActionListener(e -> {
             applyNewGravity();
             applyNewRadius();
             applyNewMass();
         });
+        panel.add(applyButton);
 
-        Timer timer = new Timer(16, this);
-        timer.start();
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        
+        // Spawn Object Button
+        JButton spawnObjecButton = new JButton("Spawn New Object");
+        spawnObjecButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        spawnObjecButton.addActionListener(e -> {
+            engine.spawnNewParticle(SimulationApp.this.getWidth());
+        });
+        panel.add(spawnObjecButton);
+        
+        return panel;
+    }
+    
+    private JComponent getSimulationArea() {
+        return new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                SimulationApp.this.paintComponent(g);
+            }
+        };
     }
 
     private void applyNewGravity() {
         try {
             double newGravity = Double.parseDouble(gravityField.getText());
             engine.setAllGravity(newGravity);
-            repaint();
         } 
         catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Invalid gravity value", "Error", JOptionPane.ERROR_MESSAGE);
@@ -97,7 +135,6 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
                 return;
             }
             engine.setAllRadius(newRadius);
-            repaint();
         }
         catch (NumberFormatException e){
             JOptionPane.showMessageDialog(this, "Invalid radius value", "Error", JOptionPane.ERROR_MESSAGE);
@@ -112,7 +149,6 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
                 return;
             }
             engine.setAllMass(newMass);
-            repaint();
         }
         catch (NumberFormatException e){
             JOptionPane.showMessageDialog(this, "Invalid mass value", "Error", JOptionPane.ERROR_MESSAGE);
@@ -123,7 +159,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Modular Physics Simulation");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(800, 600);
+            frame.setSize(1000, 600); 
             frame.getContentPane().add(new SimulationApp());
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
