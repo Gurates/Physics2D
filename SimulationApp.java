@@ -1,8 +1,5 @@
-import java.awt.Graphics2D;
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -10,13 +7,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
-import java.util.Random;
 import java.lang.Math;
 
 public class SimulationApp extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener {
 
-    private final ArrayList<Particle> particles;
+    private final PhysicsEngine engine;
     private final int FLOOR_Y = 540;
     
     // UI
@@ -24,13 +19,13 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     private final JTextField radiusField;
     private final JTextField massField;
     
+    // Mouse etkileşimi
     private boolean isDragging = false;
     private int offsetX, offsetY;
     private Particle draggedParticle = null;
+
     public SimulationApp() {
-        
-        this.particles = new ArrayList<>();
-        this.particles.add(new Particle(100, 50, 20));
+        this.engine = new PhysicsEngine();
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -41,32 +36,34 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
         // UI
         setLayout(new FlowLayout());
         
-        // gravity
+        Particle initialParticle = engine.getParticles().get(0);
+
+        // Gravity
         gravityField = new JTextField(5);
-        gravityField.setText(String.valueOf(this.particles.get(0).gravityForce));
+        gravityField.setText(String.valueOf(initialParticle.gravityForce));
         add(new JLabel("Gravity:"));
         add(gravityField);
         
         // Radius
         radiusField = new JTextField(5);
-        radiusField.setText(String.valueOf(this.particles.get(0).radius));
+        radiusField.setText(String.valueOf(initialParticle.radius));
         add(new JLabel("Radius:"));
         add(radiusField);
         
         // Mass
         massField = new JTextField(5);
-        massField.setText(String.valueOf(this.particles.get(0).mass));
+        massField.setText(String.valueOf(initialParticle.mass));
         add(new JLabel("Mass:"));
         add(massField);
 
-        // apply button
+        // Apply Button
         JButton applyButton = new JButton("Apply");
         
         // Spawn Object Button
         JButton spawnObjecButton = new JButton("Spawn Object");
         add(spawnObjecButton);
         spawnObjecButton.addActionListener(e -> {
-            spawnNewParticle();
+            engine.spawnNewParticle(getWidth());
         });
 
         add(applyButton);
@@ -84,9 +81,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     private void applyNewGravity() {
         try {
             double newGravity = Double.parseDouble(gravityField.getText());
-            for(Particle p : particles) {
-                p.gravityForce = newGravity;
-            }
+            engine.setAllGravity(newGravity);
             repaint();
         } 
         catch (NumberFormatException e) {
@@ -101,9 +96,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
                 JOptionPane.showMessageDialog(this, "Radius must be a positive value", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            for(Particle p : particles) {
-                p.radius = newRadius;
-            }
+            engine.setAllRadius(newRadius);
             repaint();
         }
         catch (NumberFormatException e){
@@ -118,9 +111,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
                 JOptionPane.showMessageDialog(this, "Mass must be a positive value", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            for(Particle p : particles) {
-                p.mass = newMass;
-            }
+            engine.setAllMass(newMass);
             repaint();
         }
         catch (NumberFormatException e){
@@ -130,7 +121,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Physics Simulation");
+            JFrame frame = new JFrame("Modular Physics Simulation");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 600);
             frame.getContentPane().add(new SimulationApp());
@@ -147,7 +138,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
         g.fillRect(0, 0, getWidth(), getHeight()); 
         Graphics2D g2 = (Graphics2D) g;
         
-        for (Particle p : this.particles) {
+        for (Particle p : engine.getParticles()) {
             g2.setColor(Color.BLUE); 
             
             int x = (int) (p.position.x - p.radius);
@@ -160,63 +151,18 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
         g2.fillRect(0, FLOOR_Y, getWidth(), 30);
     }
 
-    private void spawnNewParticle(){
-        Random rand = new Random();
-        int randomX = rand.nextInt(getWidth() - 40) + 20;
-        int randomRadius = rand.nextInt(16) + 15;
-        
-        Particle newp = new Particle(randomX, 50, randomRadius);
-        this.particles.add(newp);
-        repaint();  
-    }
-    private void Collision(Particle p){ 
-        double bottomEdge = p.position.y + p.radius;
-        
-        if(bottomEdge >= FLOOR_Y){
-            p.position.y = FLOOR_Y - p.radius;
-
-            //sekme
-            p.velocity.y *= -p.RESTITUTION;
-            p.gravityForce = 500;
-        }
-
-        if (Math.abs(p.position.y - FLOOR_Y) < 5.0) {
-            p.velocity.y = 0;
-            p.gravityForce = 0;
-            p.position.y = FLOOR_Y - p.radius;
-        }
-
-    }
-
-    // yere olan uzaklık
-    private double getDistanceToFloor() {
-        final int FLOOR_Y = 540; 
-        if (particles.isEmpty()) return 0;
-        double bottomEdgeY = particles.get(0).position.y + particles.get(0).radius;
-        return FLOOR_Y - bottomEdgeY;
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         double deltaTime = 0.016;
-        
-        for (Particle p : this.particles) {
-            p.integrate(deltaTime);
-            Collision(p);
-        }
-        
+        engine.update(deltaTime);
         repaint();
-        if (!particles.isEmpty()) {
-            double speed = particles.get(0).velocity.magnitude();
-            System.out.println("Particle Speed: " + speed + " Distance to Floor: " + getDistanceToFloor());
-        }
     }
     
     @Override
     public void mousePressed(MouseEvent e) {
         draggedParticle = null; 
 
-        for (Particle p : particles) {
+        for (Particle p : engine.getParticles()) {
             double distance = Math.sqrt(
                 Math.pow(e.getX() - p.position.x, 2) + 
                 Math.pow(e.getY() - p.position.y, 2)
@@ -224,7 +170,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
             
             if (distance <= p.radius) {
                 isDragging = true;
-                draggedParticle = p;
+                draggedParticle = p; 
                 offsetX = (int) (e.getX() - p.position.x);
                 offsetY = (int) (e.getY() - p.position.y);
                 
@@ -249,7 +195,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     public void mouseReleased(MouseEvent e) {
         if (isDragging && draggedParticle != null) {
             isDragging = false;
-            applyNewGravity(); 
+            applyNewGravity();
             draggedParticle = null; 
         }
     }
@@ -260,7 +206,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_S) {
-            spawnNewParticle();
+            engine.spawnNewParticle(getWidth());
         }
     }
 
@@ -272,5 +218,4 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
     @Override public void mouseMoved(MouseEvent e) {}
-
 }
