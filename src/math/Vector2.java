@@ -11,6 +11,10 @@ public class Vector2 {
         return new Vector2(this.x + other.x, this.y + other.y);
     }
 
+    public Vector2 subtract(Vector2 other) {
+        return new Vector2(this.x - other.x, this.y - other.y);
+    }
+
     public Vector2 scale(double scalar) {
         return new Vector2(this.x * scalar, this.y * scalar);
     }
@@ -24,7 +28,18 @@ public class Vector2 {
         this.x = 0;
         this.y = 0;
     }
+    
     public double magnitude(){
         return Math.sqrt(this.x*this.x + this.y*this.y);
+    }
+
+    public Vector2 normalize() {
+        double m = magnitude();
+        if (m != 0) return new Vector2(this.x / m, this.y / m);
+        return new Vector2(0, 0);
+    }
+
+    public double dot(Vector2 other) {
+        return this.x * other.x + this.y * other.y;
     }
 }

@@ -24,8 +24,8 @@ public class PhysicsEngine {
         for (Particle p : particles) {
             p.integrate(deltaTime);
             handleCollision(p);
-            particleCollision(p);
         }
+        resolveCollisions();
     }
 
     // collision
@@ -46,9 +46,8 @@ public class PhysicsEngine {
         }
     }
 
-    private void particleCollision(Particle p){
+    private void resolveCollisions(){
     
-        List<Particle> particles = getParticles();
         int particleCount = particles.size();
 
         for (int i = 0; i < particleCount; i++) {
@@ -59,12 +58,32 @@ public class PhysicsEngine {
 
                 double dx = p1.position.x - p2.position.x;
                 double dy = p1.position.y - p2.position.y;
-                double distance = Math.sqrt(dx * dx + dy * dy);
+                double distSq = dx * dx + dy * dy;
 
-                double minDistance = p1.radius + p2.radius;
+                double radiusSum = p1.radius + p2.radius;
 
-                if (distance <= minDistance) {
-                    System.out.println("Collision");
+                if (distSq < radiusSum * radiusSum) {
+                    double distance = Math.sqrt(distSq);
+                    double overlap = radiusSum - distance;
+                    
+                    Vector2 normal = new Vector2(dx, dy).normalize();
+                    Vector2 correction = normal.scale(overlap / 2.0);
+                    
+                    p1.position.addSelf(correction);
+                    p2.position.addSelf(correction.scale(-1));
+
+                    Vector2 relativeVelocity = p1.velocity.subtract(p2.velocity);
+                    double velAlongNormal = relativeVelocity.dot(normal);
+
+                    if (velAlongNormal > 0) continue;
+
+                    double e = Math.min(p1.RESTITUTION, p2.RESTITUTION);
+                    double s = -(1 + e) * velAlongNormal;
+                    s /= (1 / p1.mass + 1 / p2.mass);
+
+                    Vector2 impulse = normal.scale(s);
+                    p1.velocity.addSelf(impulse.scale(1 / p1.mass));
+                    p2.velocity.addSelf(impulse.scale(-1 / p2.mass));
             }
         }
     }

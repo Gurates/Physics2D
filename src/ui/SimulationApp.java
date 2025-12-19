@@ -179,7 +179,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
             
             int x = (int) (p.position.x - p.radius);
             int y = (int) (p.position.y - p.radius);
-            int size = p.radius * 2;
+            int size = (int) (p.radius * 2);
             g2.fillOval(x, y, size, size);
         }
 
