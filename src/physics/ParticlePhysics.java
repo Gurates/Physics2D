@@ -1,15 +1,17 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+
 import java.lang.Math;
 
-public class PhysicsEngine {
+public class ParticlePhysics {
     
     private final List<Particle> particles;
     private final int FLOOR_Y = 540;
     private double currentGravity = 500.0;
 
-    public PhysicsEngine() {
+    public ParticlePhysics() {
         this.particles = new ArrayList<>();
         this.particles.add(new Particle(100, 50, 20));
         this.particles.get(0).gravityForce = currentGravity;
@@ -55,6 +57,7 @@ public class PhysicsEngine {
         
             for (int j = i + 1; j < particleCount; j++) {
                 Particle p2 = particles.get(j);
+
 
                 double dx = p1.position.x - p2.position.x;
                 double dy = p1.position.y - p2.position.y;

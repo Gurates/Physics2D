@@ -11,8 +11,9 @@ import java.lang.Math;
 
 public class SimulationApp extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener {
 
-    private final PhysicsEngine engine;
+    private final ParticlePhysics engine;
     private final int FLOOR_Y = 540;
+    private final liquidPhysics lPhysics = new liquidPhysics();
     
     // UI
     private JTextField gravityField;
@@ -25,7 +26,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     private Particle draggedParticle = null;
 
     public SimulationApp() {
-        this.engine = new PhysicsEngine();
+        this.engine = new ParticlePhysics();
 
         this.setLayout(new BorderLayout()); 
         
@@ -41,10 +42,12 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
         this.add(getSimulationArea(), BorderLayout.CENTER);
 
 
-        Particle initialParticle = engine.getParticles().get(0);
-        gravityField.setText(String.valueOf(initialParticle.gravityForce));
-        radiusField.setText(String.valueOf(initialParticle.radius));
-        massField.setText(String.valueOf(initialParticle.mass));
+        if (!engine.getParticles().isEmpty()) {
+            Particle initialParticle = engine.getParticles().get(0);
+            gravityField.setText(String.valueOf(initialParticle.gravityForce));
+            radiusField.setText(String.valueOf(initialParticle.radius));
+            massField.setText(String.valueOf(initialParticle.mass));
+        }
 
         Timer timer = new Timer(16, this);
         timer.start();
@@ -104,6 +107,20 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
             engine.spawnNewParticle(SimulationApp.this.getWidth());
         });
         panel.add(spawnObjecButton);
+
+        JButton liquidPhysicsButton = new JButton("Toggle Liquid Physics");
+        liquidPhysicsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        liquidPhysicsButton.setAlignmentY(Component.CENTER_ALIGNMENT);
+        liquidPhysicsButton.addActionListener(e -> {
+            engine.getParticles().clear();
+            lPhysics.getParticles().clear();
+            for(int i = 0; i <= 1000; i++){
+                lPhysics.spawnLiquid(SimulationApp.this.getWidth());
+            }
+            engine.getParticles().addAll(lPhysics.getLParticles());
+            repaint();
+        });
+        panel.add(liquidPhysicsButton);
         
         return panel;
     }
@@ -191,6 +208,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     public void actionPerformed(ActionEvent e) {
         double deltaTime = 0.016;
         engine.update(deltaTime);
+        lPhysics.update();
         repaint();
     }
     
@@ -254,4 +272,5 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
     @Override public void mouseMoved(MouseEvent e) {}
+    
 }
