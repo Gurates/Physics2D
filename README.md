@@ -67,3 +67,5 @@ This is an **open-source educational project**, and contributions are highly enc
     ```bash
     java SimulationApp
     ```
+<img width="1229" height="730" alt="Image" src="https://github.com/user-attachments/assets/635e4b57-24aa-49c3-b944-765eacea266e" />
+<img width="1229" height="737" alt="Image" src="https://github.com/user-attachments/assets/af53f63f-e872-46a6-8057-be7bda5dcb06" />
