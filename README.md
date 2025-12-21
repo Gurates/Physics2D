@@ -1,21 +1,69 @@
-# 2D Physics Simulation
+# 2D Physics & Liquid Simulation Engine (Open Source)
 
-This project is a modular application developed with Java Swing, forming the **foundation of basic 2D physics simulations** for multiple circular particles. It demonstrates the **simplest principles of Newtonian mechanics**.
+This project is a modular physics simulation environment developed using Java Swing. It provides an interactive platform to explore **Newtonian Mechanics**, **Rigid Body Collisions**, and **Smoothed Particle Hydrodynamics (SPH)** for fluid simulation.
 
-## Features
-* **Physics Engine:** Manages particle integration (motion), floor collision, and inter-particle collision detection.
-* **Controls:** Real-time adjustment of global Gravity, Mass, and Radius via text fields.
-* **Input:** Particles can be spawned using the **"Spawn Object" button** or by pressing the **'S' key**.
-* **Interaction:** Particles can be dragged and repositioned with the mouse.
+The primary objective of this project is to demonstrate how complex physical phenomena can be modeled from scratch using pure Java, without relying on external physics libraries.
 
-## How to Run
-This project requires **JDK 8 or newer**.
+## Main Features
 
-1.  **Compile:** Compile all source files (`Particle.java`, `Vector2.java`, `PhysicsEngine.java`, `SimulationApp.java`) in your project directory:
+### 1. Rigid Body Physics
+* **Collision Resolution:** Implements impulse-based collision logic with mass-weighted **position correction** to prevent particle overlapping.
+* **Momentum:** Conservation of momentum for both elastic and inelastic collision scenarios.
+* **Environmental Interaction:** Robust floor and wall collision detection.
+
+### 2. Liquid Physics (SPH) & Optimization
+* **Fluid Dynamics:** Real-time water simulation using the **Smoothed Particle Hydrodynamics (SPH)** algorithm.
+* **Internal Forces:** Density-based **Pressure** (repulsion) and **Viscosity** (friction) calculations.
+* **Spatial Hashing (Grid System):** An optimized grid-based neighbor search system that reduces complexity from $O(N^2)$ to approximately $O(N)$. This enables fluid simulation of hundreds of particles with high performance.
+
+
+
+### 3. Interactive Interface & Controls
+* **Real-time Parameters:** On-the-fly adjustment of gravity, mass, and radius values.
+* **Dynamic Interaction:** Ability to grab, drag, and toss particles using the mouse, or spawn new objects with the 'S' key.
+* **Modes:** Seamless switching between individual rigid bodies and large liquid volumes.
+
+## Technical Overview
+
+* **Integration:** Utilizes the "Semi-implicit Euler" method for stable motion calculations.
+* **Vector Mathematics:** All physical calculations are processed through a custom `Vector2` library.
+* **Performance:** Proximity tests for SPH calculations are optimized via a custom `HashMap`-based Grid system.
+
+## Controls and Inputs
+
+| Input | Action |
+| :--- | :--- |
+| **Mouse Drag** | Grabs and tosses particles. |
+| **'S' Key** | Spawns a rigid particle at a random location. |
+| **Gravity Field** | Sets the global downward force (N). |
+| **Radius Field** | Determines the size of objects (px). |
+| **Toggle Liquid** | Clears the scene and initializes the SPH fluid simulation. |
+
+## Contributing
+
+This is an **open-source educational project**, and contributions are highly encouraged. If you would like to enhance the physics engine, improve performance, or add new features, please follow the guidelines below.
+
+### Areas for Contribution:
+* **Physics Engine Improvements:** Implementation of inter-particle friction or Verlet Integration.
+* **Fluid Enhancements:** Surface tension calculations or presets for different liquid types (e.g., honey, oil).
+* **Visualization:** Integration with OpenGL (LWJGL) instead of Java 2D for advanced rendering.
+* **Bug Fixes:** Improving edge-case handling in current collision detection algorithms.
+
+### How to Contribute:
+1.  **Fork** the repository.
+2.  Create a new **branch** for your feature (`git checkout -b feature/AdvancedPhysics`).
+3.  **Commit** your changes (`git commit -m 'Add: Inter-particle friction'`).
+4.  **Push** to the branch (`git push origin feature/AdvancedPhysics`).
+5.  Open a **Pull Request**.
+
+## Installation and Execution
+
+1.  **Requirement:** Ensure **JDK 8** or higher is installed on your system.
+2.  **Compilation:**
     ```bash
     javac *.java
     ```
-2.  **Run:** Execute the main application:
+3.  **Execution:**
     ```bash
     java SimulationApp
     ```

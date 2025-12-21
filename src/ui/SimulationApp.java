@@ -114,7 +114,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
         liquidPhysicsButton.addActionListener(e -> {
             engine.getParticles().clear();
             lPhysics.getParticles().clear();
-            for(int i = 0; i <= 1000; i++){
+            for(int i = 0; i <= 2000; i++){
                 lPhysics.spawnLiquid(SimulationApp.this.getWidth());
             }
             engine.getParticles().addAll(lPhysics.getLParticles());
@@ -208,7 +208,7 @@ public class SimulationApp extends JPanel implements ActionListener, MouseListen
     public void actionPerformed(ActionEvent e) {
         double deltaTime = 0.016;
         engine.update(deltaTime);
-        lPhysics.update();
+        lPhysics.update(deltaTime);
         repaint();
     }
     
