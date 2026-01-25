@@ -1,4 +1,4 @@
-# 2D Physics & Liquid Simulation Engine (Open Source)
+# 2D Physics
 
 This project is a modular physics simulation environment developed using Java Swing. It provides an interactive platform to explore **Newtonian Mechanics**, **Rigid Body Collisions**, and **Smoothed Particle Hydrodynamics (SPH)** for fluid simulation.
 
